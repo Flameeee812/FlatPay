@@ -2,12 +2,23 @@ import flask as fl
 from flask import g
 
 from database.db_services import readings_services
-from database.db_services.payment_services import update_debt
+from database.db_services.payment_services import update_next_debt
 
 
 async def update_user_readings():
-    """Хендлер для страницы обновления показаний счётчиков"""
+    """
+    Хендлер для обработки запросов для обновления показаний счётчиков пользователя.
 
+    - В случае GET-запроса возвращает страницу с формой для обновления данных.
+    - В случае POST-запроса обновляет показания счётчиков в базе данных и, если обновление прошло успешно,
+      вызывает обновление долга пользователя. Затем возвращает страницу с подтверждением или ошибкой.
+
+    Параметры:
+    Нет.
+
+    Возвращаемое значение:
+    - Шаблон страницы с результатом обновления показаний счётчиков (успех или ошибка).
+    """
     if fl.request.method == "GET":
         return fl.render_template("update_readings.html")
 
@@ -22,15 +33,26 @@ async def update_user_readings():
         db_conn = g.db_conn
 
         if await readings_services.update_readings(db_conn, passport, readings):
-            await update_debt(db_conn, passport)
+            await update_next_debt(db_conn, passport, readings)
             return fl.render_template("successful_update_readings.html", passport=passport)
 
         return fl.render_template("lose_update_readings.html")
 
 
 async def get_readings_info():
-    """Хендлер для страницы получения информации о показаниях счётчиков"""
+    """
+    Хендлер для обработки запросов для получения информации о показаниях счётчиков пользователя.
 
+    - В случае GET-запроса возвращает страницу с формой для получения данных.
+    - В случае POST-запроса извлекает показания из базы данных и отображает их пользователю.
+    - Если данные о показаниях не найдены, возвращается ошибка.
+
+    Параметры:
+    Нет.
+
+    Возвращаемое значение:
+    - Шаблон страницы с результатами получения показаний счётчиков (успех или ошибка).
+    """
     if fl.request.method == "GET":
         return fl.render_template("get_readings.html")
 

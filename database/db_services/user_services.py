@@ -5,15 +5,21 @@ from ..db_utils.user_utils import register_passport_to_db, remove_passport_from_
 from ..db_utils.validation_utils import is_valid_passport, is_passport_numeric
 
 
-service_logger = logging.getLogger("_services")
+service_logger = logging.getLogger("user_services")
 
 
 async def register_passport(connection: Connection, passport: str) -> bool:
-    """Сервис для добавления пользователя в базу данных
+    """
+    Сервис для регистрации нового пользователя в базе данных.
+
+    Перед добавлением выполняется проверка корректности введённых паспортных данных.
 
     Параметры:
-    1. connection - подключение к базе данных
-    2. passport - паспортные данные пользователя
+     - connection (Connection): Подключение к базе данных.
+     - passport (str): Паспортные данные пользователя.
+
+    Возвращаемое значение:
+     - bool: True, если регистрация прошла успешно, иначе False.
     """
 
     if is_valid_passport(passport) is False:
@@ -37,12 +43,19 @@ async def register_passport(connection: Connection, passport: str) -> bool:
 
 
 async def delete_passport(connection: Connection, passport: str) -> bool:
-    """Функция для удаления пользователя из базы данных
+    """
+    Сервис для удаления пользователя из базы данных.
 
-        Параметры:
-        1. connection - подключение к базе данных
-        2. passport - паспортные данные пользователя
-        """
+    Перед удалением проверяется корректность паспортных данных.
+    Если пользователь не найден, записывается предупреждение в лог.
+
+    Параметры:
+     - connection (Connection): Подключение к базе данных.
+     - passport (str): Паспортные данные пользователя.
+
+    Возвращаемое значение:
+     - bool: True, если пользователь успешно удалён, иначе False.
+    """
 
     if is_passport_numeric(passport) is False:
         return False

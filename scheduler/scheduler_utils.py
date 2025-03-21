@@ -1,29 +1,55 @@
 import logging
 
+from aiosqlite import Connection
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from database.db_services.payment_services import archive_debt
+from database.db_services.payment_services import update_current_debt
 from database.db_services.readings_services import reset_readings
 
 
 scheduler_logger = logging.getLogger("scheduler_utils")
 
 
-async def schedule_reset_debt(connection):
-    await archive_debt(connection)
-
-
-async def schedule_reset_readings(connection):
-    await reset_readings(connection)
-
-
-async def run_background_tasks(connection):
+async def schedule_reset_debt(connection: Connection) -> None:
     """
-    Функция для старта фоновых задач по обновлению долгов и сбросу показаний счётчиков.
+    Асинхронная задача для переноса задолженности пользователей в основной долг.
 
     Параметры:
-    1. connection - подключение к базе данных
-"""
+     - connection (Connection): Асинхронное соединение с базой данных.
+    """
+
+    await update_current_debt(connection)
+
+    return None
+
+
+async def schedule_reset_readings(connection: Connection) -> None:
+    """
+    Асинхронная задача для сброса показаний счётчиков пользователей.
+
+    Параметры:
+     - connection: Асинхронное соединение с базой данных.
+    """
+
+    await reset_readings(connection)
+
+    return None
+
+
+async def run_background_tasks(connection: Connection) -> AsyncIOScheduler:
+    """
+    Запускает фоновые задачи по обновлению долгов и сбросу показаний счётчиков.
+
+    Каждое первое число месяца в 00:00:
+     - Переносит задолженность пользователей в основной долг.
+     - Обнуляет показания счётчиков.
+
+    Параметры:
+     - connection: Асинхронное соединение с базой данных.
+
+    Возвращает:
+     - AsyncIOScheduler: Планировщик фоновых задач.
+    """
 
     scheduler = AsyncIOScheduler()
 
@@ -42,8 +68,13 @@ async def run_background_tasks(connection):
     return scheduler
 
 
-def end_tasks(scheduler) -> None:
-    """Функция для завершения работы планировщика"""
+def end_tasks(scheduler: AsyncIOScheduler) -> None:
+    """
+    Завершает работу планировщика задач.
+
+    Параметры:
+     - scheduler: Экземпляр AsyncIOScheduler.
+    """
 
     scheduler.shutdown()
     scheduler_logger.info("Планировщик задач остановлен")

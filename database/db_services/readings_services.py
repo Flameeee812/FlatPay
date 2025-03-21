@@ -11,10 +11,11 @@ service_logger = logging.getLogger("readings_services")
 
 
 async def reset_readings(connection: Connection) -> None:
-    """Функция, обнуляющая показания счетчиков.
+    """
+    Сервис для обнуления показаний счётчиков всех пользователей.
 
     Параметры:
-    1. connection - подключение к базе данных
+     - connection (Connection): Подключение к базе данных.
     """
 
     try:
@@ -27,13 +28,20 @@ async def reset_readings(connection: Connection) -> None:
 
 
 async def update_readings(connection: Connection, passport: str, readings: dict[str, str]) -> bool:
-    """Функция для обновления показаний счётчиков пользователя
+    """
+    Сервис для обновления показаний счётчиков пользователя.
 
-        Параметры:
-        1. connection - подключение к базе данных
-        2. passport - паспортные данные пользователя
-        3. readings -
-        """
+    Перед обновлением выполняется проверка существования пользователя
+    и корректности переданных паспортных данных.
+
+    Параметры:
+     - connection (Connection): Подключение к базе данных.
+     - passport (str): Паспортные данные пользователя.
+     - readings (dict[str, str]): Новые показания счётчиков в формате {тип_ресурса: расход}.
+
+    Возвращаемое значение:
+     - bool: True, если обновление прошло успешно, иначе False.
+    """
 
     if await is_user_exists(connection, passport) is False:
         return False
@@ -52,12 +60,19 @@ async def update_readings(connection: Connection, passport: str, readings: dict[
 
 
 async def get_readings(connection: Connection, passport: str) -> tuple | bool:
-    """Функция для получения информации о показаниях счётчиков пользователя
+    """
+    Сервис для получения актуальных показаний счётчиков пользователя.
 
-        Параметры:
-        1. connection - подключение к базе данных
-        2. passport - паспортные данные пользователя
-        """
+    Перед запросом проверяется корректность паспортных данных.
+
+    Параметры:
+    - connection (Connection): Подключение к базе данных.
+    - passport (str): Паспортные данные пользователя.
+
+    Возвращаемое значение:
+     - tuple: Кортеж с показаниями счётчиков, если данные найдены.
+     - bool: False, если пользователь не найден или произошла ошибка.
+    """
 
     if is_passport_numeric(passport) is False:
         return False

@@ -1,18 +1,32 @@
-import os
-
-import aiosqlite as sql
+from aiosqlite import Connection, connect
 
 from config import load_config
-from logger import setup_logger
 
 
 config = load_config()
 
 
 async def get_connection():
-    """Функция для получения базы данных"""
+    """
+    Утилита для получения соединения с базой данных.
 
-    connection = await sql.connect(config.DATABASE_PATH, check_same_thread=False)
+    Возвращаемое значение:
+     - connection (Connection): Асинхронное соединение с базой данных.
+    """
+
+    connection = await connect(config.DATABASE_PATH, check_same_thread=False)
+    await create_table(connection)
+
+    return connection
+
+
+async def create_table(connection: Connection):
+    """
+    Утилита для создания sql таблицы.
+
+    Параметры:
+     - connection (Connection): Асинхронное соединение с базой данных.
+    """
 
     await connection.execute('''
     CREATE TABLE IF NOT EXISTS Taxpayers (
@@ -24,23 +38,21 @@ async def get_connection():
         gas INTEGER DEFAULT 0,
         debt REAL DEFAULT 0.0,
         last_payment REAL DEFAULT 0.0,
-        last_month_debt REAL DEFAULT 0.0
+        next_month_debt REAL DEFAULT 0.0
     )
     ''')
 
     await connection.commit()
 
-    return connection
+    return None
 
 
-def close_connection(connection):
-    """Функция для закрытия базы данных.
+def close_connection(connection: Connection):
+    """Утилита для закрытия базы данных.
 
     Параметры:
-    1. connection - подключение к базе данных
+     - connection: Асинхронное соединение с базой данных.
     """
 
     connection.close()
-    logger.app_logger.info("База данных закрыта")
-
     return None
