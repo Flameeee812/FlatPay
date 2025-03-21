@@ -1,0 +1,72 @@
+version: 1
+disable_existing_loggers: False
+
+formatters:
+  default:
+    format: '#%(levelname)-8s %(name)s:%(funcName)s - %(message)s'
+
+  formatter_1:
+    format: '#%(levelname)-8s [%(asctime)s] - %(filename)s:%(lineno)d - %(name)s:%(funcName)s - %(message)s'
+
+handlers:
+  default:
+    class: logging.StreamHandler
+    formatter: default
+
+  utils_file:
+    class: logging.FileHandler
+    filename: utils.log
+    mode: a
+    formatter: default
+
+  service_file:
+    class: logging.FileHandler
+    filename: service.log
+    mode: a
+    formatter: formatter_1
+
+  scheduler_file:
+    class: logging.FileHandler
+    filename: scheduler.log
+    mode: a
+    formatter: default
+
+loggers:
+  run_app:
+    level: INFO
+    handlers: [default]
+    propagate: False
+
+  payment_services:
+    level: DEBUG
+    handlers: [service_file]
+    propagate: False
+
+  readings_services:
+    level: DEBUG
+    handlers: [service_file]
+    propagate: False
+
+  user_services:
+    level: DEBUG
+    handlers: [service_file]
+    propagate: False
+
+  validation_utils:
+    level: DEBUG
+    handlers: [utils_file]
+    propagate: False
+
+  scheduler:
+    level: INFO
+    handlers: [scheduler_file]
+    propagate: False
+
+  scheduler_utils:
+    level: INFO
+    handlers: [scheduler_file]
+    propagate: False
+
+root:
+  level: WARNING
+  handlers: [default]
