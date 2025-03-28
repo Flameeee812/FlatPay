@@ -1,6 +1,6 @@
 import flask as fl
 
-from app.handlers import (
+from server.app.handlers import (
     home_handler, registration, delete_user_passport,
     update_user_readings, get_readings_info,
     apply_user_payment, get_debt_info
