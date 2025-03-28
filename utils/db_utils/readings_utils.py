@@ -45,7 +45,12 @@ def clean_readings(readings: dict[str, str]) -> dict[str, int]:
      - dict[str, int]: Словарь со значениями, преобразованными в целочисленный формат.
     """
 
-    cleaned_readings = {key: int(value) for key, value in readings.items()}
+    cleaned_readings = {}
+    for key, value in readings.items():
+        try:
+            cleaned_readings[key] = int(value)
+        except ValueError:
+            cleaned_readings[key] = 0
 
     return cleaned_readings
 

@@ -6,7 +6,7 @@ from database.database import get_connection, close_connection
 
 
 # Создаём экземпляр приложения Flask
-app = fl.Flask(__name__, template_folder="../templates")
+app = fl.Flask(__name__, template_folder="../templates", static_folder='../static')
 # Регистрируем blueprint с префиксом "/vba" для всех URL
 app.register_blueprint(blueprint, url_prefix="/vba")
 

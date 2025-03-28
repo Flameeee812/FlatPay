@@ -1,8 +1,8 @@
 import logging
 from sqlite3 import Connection, IntegrityError
 
-from ..db_utils.user_utils import register_passport_to_db, remove_passport_from_db
-from ..db_utils.validation_utils import is_valid_passport, is_passport_numeric
+from utils.db_utils.user_utils import register_passport_to_db, remove_passport_from_db
+from utils.validation_utils import is_valid_passport, is_passport_numeric
 
 
 service_logger = logging.getLogger("user_services")

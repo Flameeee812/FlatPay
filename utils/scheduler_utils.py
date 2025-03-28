@@ -3,8 +3,8 @@ import logging
 from aiosqlite import Connection
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from database.db_services.payment_services import update_current_debt
-from database.db_services.readings_services import reset_readings
+from services.db_services.payment_services import update_current_debt
+from services.db_services.readings_services import reset_readings
 
 
 scheduler_logger = logging.getLogger("scheduler_utils")

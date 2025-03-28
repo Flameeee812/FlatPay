@@ -1,6 +1,6 @@
 from aiosqlite import Connection
 
-from ..db_utils.validation_utils import is_user_exists
+from utils.validation_utils import is_user_exists
 
 
 async def register_passport_to_db(connection: Connection, passport: str) -> None:

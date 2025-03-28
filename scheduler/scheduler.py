@@ -1,6 +1,6 @@
 import logging
 
-from .scheduler_utils import run_background_tasks
+from utils.scheduler_utils import run_background_tasks
 from database import get_connection
 
 

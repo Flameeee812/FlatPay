@@ -1,10 +1,10 @@
 import logging
 from sqlite3 import Connection
 
-from ..db_utils.readings_utils import (
+from utils.db_utils.readings_utils import (
     reset_meter_readings, update_user_readings, fetch_user_readings
 )
-from ..db_utils.validation_utils import is_user_exists, is_passport_numeric
+from utils.validation_utils import is_user_exists, is_passport_numeric
 
 
 service_logger = logging.getLogger("readings_services")
@@ -55,7 +55,7 @@ async def update_readings(connection: Connection, passport: str, readings: dict[
         return True
 
     except Exception as e:
-        service_logger.exception(f"Ошибка при добавлении показаний в базу данных: {e}")
+        service_logger. exception(f"Ошибка при добавлении показаний в базу данных: {e}")
         return False
 
 

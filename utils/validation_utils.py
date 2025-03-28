@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 
 from aiosqlite import Connection
 
@@ -6,7 +7,26 @@ from aiosqlite import Connection
 utils_logger = logging.getLogger("validation_utils")
 
 
-def is_passport_numeric(passport: str):
+def is_early(passport: str, deadline: int = 24) -> bool:
+    """
+    Проверяет, можно ли вносить показания счётчиков на текущий день.
+
+    Если текущий день месяца больше `deadline`, то внесение разрешено.
+    В противном случае функция логирует попытку раннего внесения.
+
+    Параметры:
+     - passport (str): Номер паспорта пользователя.
+     - deadline (int) - Первый день месяца, после которого разрешено внесение (по умолчанию 24).
+    """
+
+    if date.today().day > deadline:
+        return False
+
+    utils_logger.info(f"Пользователь {passport} попытался внести оплату до {deadline}-го числа.")
+    return True
+
+
+def is_passport_numeric(passport: str) -> bool:
     """
     Утилита для проверки того, что все переданные символы являются чисоами.
 

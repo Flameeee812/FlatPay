@@ -5,7 +5,8 @@ import uvicorn
 from asgiref.wsgi import WsgiToAsgi
 
 from app import app
-from scheduler import end_tasks, run_scheduler
+from scheduler import run_scheduler
+from utils.scheduler_utils import end_tasks
 from logger import setup_logger_func
 
 if __name__ == "__main__":
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
         try:
             app_logger.info("Приложение запущено")
-            config = uvicorn.Config(app, host="127.0.0.1", port=5005)
+            config = uvicorn.Config(app, host="127.0.0.1", port=5005, reload=True)
             server = uvicorn.Server(config)
             await server.serve()
 

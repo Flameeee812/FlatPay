@@ -1,7 +1,7 @@
 import flask as fl
 from flask import g
 
-from database.db_services import user_services
+from services import user_services
 
 
 async def home_handler():

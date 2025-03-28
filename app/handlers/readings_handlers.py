@@ -1,8 +1,9 @@
 import flask as fl
 from flask import g
 
-from database.db_services import readings_services
-from database.db_services.payment_services import update_next_debt
+from services import readings_services
+from services.db_services.payment_services import update_next_debt
+from utils.validation_utils import is_early
 
 
 async def update_user_readings():
@@ -31,6 +32,9 @@ async def update_user_readings():
             "gas": fl.request.form.get("gas")
         }
         db_conn = g.db_conn
+
+        if is_early(passport):
+            return fl.render_template("early_update_readings.html")
 
         if await readings_services.update_readings(db_conn, passport, readings):
             await update_next_debt(db_conn, passport, readings)
