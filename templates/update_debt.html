@@ -10,11 +10,11 @@
         <h1>Оплата долга</h1>
         <form action="{{ url_for('blueprint.update_debt') }}" method="post">
             <div class="form-group">
-                <label for="passport">Для оплаты введите ваши паспортные данные:</label>
+                <label for="passport">Для оплаты введите ваши паспортные данные:</label><br>
                 <input type="text" id="passport" name="passport" required><br><br>
             </div>
             <div class="form-group">
-                <label for="new_payment">Введите оплату:</label>
+                <label for="new_payment">Введите оплату:</label><br>
                 <input type="text" id="new_payment" name="new_payment" required><br><br>
             </div>
             <div class="form-group">

@@ -7,9 +7,9 @@ body {
     color: #333;
     line-height: 1.6;
     display: flex;
-    justify-content: center;  /* Центрируем по горизонтали */
-    align-items: center;      /* Центрируем по вертикали */
-    height: 100vh;            /* Задаём высоту на весь экран */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* Стили для текстового поля */
@@ -29,12 +29,29 @@ input[type="text"]:focus {
      outline: none;
 }
 
+input[type="submit"] {
+    background: linear-gradient(to right, #3498db, #2980b9);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    margin: 1.5rem 0;
+    text-align: center;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 100%;
+    max-width: 300px;
+}
+
 .container {
     max-width: 800px;
     padding: 2rem;
-    width: 100%; /* Подстраиваем ширину под родительский элемент */
-    box-sizing: border-box; /* Учитываем padding в общей ширине */
-    text-align: center; /* Центрируем текст внутри контейнера */
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 h1 {
@@ -144,23 +161,6 @@ a:hover {
 .btn.teal {
     background: linear-gradient(to right, #1abc9c, #16a085);
     color: white;
-}
-
-input[type="submit"] {
-    background: linear-gradient(to right, #3498db, #2980b9);
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 30px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
-    margin: 1.5rem 0;
-    text-align: center;
-    border: none;
-    cursor: pointer;
-    font-size: 1.1rem;
-    width: 100%;
-    max-width: 300px;
 }
 
 /* Адаптивность */
