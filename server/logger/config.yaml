@@ -15,19 +15,19 @@ handlers:
 
   utils_file:
     class: logging.FileHandler
-    filename: utils.log
+    filename: logs/utils.log
     mode: a
     formatter: default
 
   service_file:
     class: logging.FileHandler
-    filename: service.log
+    filename: logs/service.log
     mode: a
     formatter: formatter_1
 
   scheduler_file:
     class: logging.FileHandler
-    filename: scheduler.log
+    filename: logs/scheduler.log
     mode: a
     formatter: default
 
