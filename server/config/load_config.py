@@ -19,7 +19,7 @@ class Config:
 
 def load_config(path: str | None = None) -> Config:
     """
-    Загружает конфигурацию из файла .env.
+    Фабрика для создания переменной конфигурации.
 
     Параметры:
      - path (str | None): Путь к файлу .env (по умолчанию None, ищет в корне проекта).
@@ -29,7 +29,7 @@ def load_config(path: str | None = None) -> Config:
     """
 
     env = Env()
-    env.read_env(path)
+    env.read_env(path)  # Чтение файла .env
 
     config = Config(
         DATABASE_PATH=env("DATABASE_PATH"),

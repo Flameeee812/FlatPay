@@ -1,6 +1,6 @@
 from aiosqlite import Connection, connect
 
-from ..config import config
+from ..config import ConfigStore
 
 
 async def get_connection():
@@ -11,9 +11,10 @@ async def get_connection():
      - connection (Connection): Асинхронное соединение с базой данных.
     """
 
-    connection = await connect(config.DATABASE_PATH, check_same_thread=False)
-    await create_table(connection)
+    config = ConfigStore.get_config()
 
+    connection: Connection = await connect(config.DATABASE_PATH, check_same_thread=False)
+    await create_table(connection)
     return connection
 
 
@@ -40,11 +41,10 @@ async def create_table(connection: Connection):
     ''')
 
     await connection.commit()
-
     return None
 
 
-async def close_connection(connection: Connection):
+async def close_connection(connection: Connection) -> None:
     """Утилита для закрытия базы данных.
 
     Параметры:
