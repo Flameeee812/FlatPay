@@ -2,11 +2,11 @@ import logging
 from asyncio import create_task, gather
 from sqlite3 import Connection
 
-from utils.db_utils.payment_utils import (
+from server.utils.db_utils.payment_utils import (
     apply_user_payment, calculate_base_debt, update_current_month_debt,
     update_next_month_debt, fetch_user_debt, reset_next_month_debt
 )
-from utils.validation_utils import is_user_exists, is_passport_numeric
+from server.utils.validation_utils import is_user_exists, is_passport_numeric
 
 
 service_logger = logging.getLogger("payment_services")

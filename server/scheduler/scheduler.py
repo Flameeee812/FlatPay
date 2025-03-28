@@ -1,7 +1,7 @@
 import logging
 
-from utils.scheduler_utils import run_background_tasks
-from database import get_connection
+from server.utils.scheduler_utils import run_background_tasks
+from server.database import get_connection
 
 
 scheduler_logger = logging.getLogger("scheduler")

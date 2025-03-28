@@ -1,10 +1,10 @@
 import logging
 from sqlite3 import Connection
 
-from utils.db_utils.readings_utils import (
+from server.utils.db_utils.readings_utils import (
     reset_meter_readings, update_user_readings, fetch_user_readings
 )
-from utils.validation_utils import is_user_exists, is_passport_numeric
+from server.utils.validation_utils import is_user_exists, is_passport_numeric
 
 
 service_logger = logging.getLogger("readings_services")

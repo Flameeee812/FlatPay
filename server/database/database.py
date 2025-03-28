@@ -1,9 +1,6 @@
 from aiosqlite import Connection, connect
 
-from config import load_config
-
-
-config = load_config()
+from ..config import config
 
 
 async def get_connection():

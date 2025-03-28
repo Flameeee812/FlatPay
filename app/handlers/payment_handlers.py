@@ -1,7 +1,7 @@
 import flask as fl
 from flask import g
 
-from services import payment_services
+from server.services.db_services import payment_services
 
 
 async def apply_user_payment():

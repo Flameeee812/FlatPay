@@ -4,10 +4,10 @@ import logging
 import uvicorn
 from asgiref.wsgi import WsgiToAsgi
 
-from app import app
-from scheduler import run_scheduler
-from utils.scheduler_utils import end_tasks
-from logger import setup_logger_func
+from .setup_app import app
+from server.scheduler import run_scheduler
+from server.utils.scheduler_utils import end_tasks
+from server.logger import setup_logger_func
 
 if __name__ == "__main__":
 

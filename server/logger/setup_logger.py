@@ -8,7 +8,7 @@ def setup_logger_func() -> None:
     Настройка логгера с использованием конфигурации из config.yaml файла.
     """
 
-    with open(file="logger/config.yaml", mode="rt") as f:
+    with open(file="server/logger/config.yaml", mode="rt") as f:
         config = yaml.safe_load(f)
     logging.config.dictConfig(config)
 

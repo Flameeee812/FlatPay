@@ -1,9 +1,9 @@
 import flask as fl
 from flask import g
 
-from services import readings_services
-from services.db_services.payment_services import update_next_debt
-from utils.validation_utils import is_early
+from server.services.db_services import readings_services
+from server.services.db_services.payment_services import update_next_debt
+from server.utils.validation_utils import is_early
 
 
 async def update_user_readings():
