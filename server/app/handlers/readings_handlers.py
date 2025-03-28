@@ -1,12 +1,13 @@
-import flask as fl
-from flask import g
+import quart as qa
+from quart import g
+from aiosqlite import Connection
 
 from server.services.db_services import readings_services
 from server.services.db_services.payment_services import update_next_debt
 from server.utils.validation_utils import is_early
 
 
-async def update_user_readings():
+async def update_user_readings() -> str:
     """
     Хендлер для обработки запросов для обновления показаний счётчиков пользователя.
 
@@ -20,30 +21,31 @@ async def update_user_readings():
     Возвращаемое значение:
     - Шаблон страницы с результатом обновления показаний счётчиков (успех или ошибка).
     """
-    if fl.request.method == "GET":
-        return fl.render_template("update_readings.html")
+    if qa.request.method == "GET":
+        return await qa.render_template("update_readings.html")
 
-    elif fl.request.method == "POST":
-        passport = fl.request.form.get("passport")
+    elif qa.request.method == "POST":
+        form_data: dict = await qa.request.form
+        passport: str = form_data.get("passport")
         readings = {
-            "electricity": fl.request.form.get("electricity"),
-            "cold_water": fl.request.form.get("cold_water"),
-            "hot_water": fl.request.form.get("hot_water"),
-            "gas": fl.request.form.get("gas")
+            "electricity": form_data.get("electricity"),
+            "cold_water": form_data.get("cold_water"),
+            "hot_water": form_data.get("hot_water"),
+            "gas": form_data.get("gas")
         }
-        db_conn = g.db_conn
 
+        db_conn: Connection = g.db_conn
         if is_early(passport):
-            return fl.render_template("early_update_readings.html")
+            return await qa.render_template("early_update_readings.html")
 
         if await readings_services.update_readings(db_conn, passport, readings):
             await update_next_debt(db_conn, passport, readings)
-            return fl.render_template("successful_update_readings.html", passport=passport)
+            return await qa.render_template("successful_update_readings.html", passport=passport)
 
-        return fl.render_template("lose_update_readings.html")
+        return await qa.render_template("lose_update_readings.html")
 
 
-async def get_readings_info():
+async def get_readings_info() -> str:
     """
     Хендлер для обработки запросов для получения информации о показаниях счётчиков пользователя.
 
@@ -57,19 +59,22 @@ async def get_readings_info():
     Возвращаемое значение:
     - Шаблон страницы с результатами получения показаний счётчиков (успех или ошибка).
     """
-    if fl.request.method == "GET":
-        return fl.render_template("get_readings.html")
+    if qa.request.method == "GET":
+        return await qa.render_template("get_readings.html")
 
-    elif fl.request.method == "POST":
-        passport = fl.request.form.get("passport")
-        db_conn = g.db_conn
-        readings = await readings_services.get_readings(db_conn, passport)
+    elif qa.request.method == "POST":
+        form_data: dict = await qa.request.form
+        passport: str = form_data.get("passport")
+
+        db_conn: Connection = g.db_conn
+        readings: tuple | bool = await readings_services.get_readings(db_conn, passport)
 
         if readings is not False:
-            return fl.render_template("successful_get_readings.html",
-                                      passport=passport,
-                                      electricity=readings[0],
-                                      cold_water=readings[1],
-                                      hot_water=readings[2],
-                                      gas=readings[3])
-        return fl.render_template("lose_get_readings.html")
+            return await qa.render_template("successful_get_readings.html",
+                                            passport=passport,
+                                            electricity=readings[0],
+                                            cold_water=readings[1],
+                                            hot_water=readings[2],
+                                            gas=readings[3])
+
+        return await qa.render_template("lose_get_readings.html")

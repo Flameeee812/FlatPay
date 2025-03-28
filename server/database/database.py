@@ -44,12 +44,12 @@ async def create_table(connection: Connection):
     return None
 
 
-def close_connection(connection: Connection):
+async def close_connection(connection: Connection):
     """Утилита для закрытия базы данных.
 
     Параметры:
      - connection: Асинхронное соединение с базой данных.
     """
 
-    connection.close()
+    await connection.close()
     return None

@@ -1,17 +1,30 @@
-import flask as fl
-from flask import g
+import quart as qa
+from quart import g, Quart, Response
+from aiosqlite import Connection
 
 from .routes import blueprint
 from server.database import get_connection, close_connection
 
 
-# Создаём экземпляр приложения Flask
-app = fl.Flask(__name__, template_folder="../../client/templates", static_folder='../../client/static')
-# Регистрируем blueprint с префиксом "/vba" для всех URL
-app.register_blueprint(blueprint, url_prefix="/vba")
+def create_app() -> Quart:
+    """Фабрика для создания экземпляра приложения Quart."""
+
+    app = qa.Quart(
+        __name__,
+        template_folder="../../client/templates",
+        static_folder='../../client/static'
+    )
+
+    # Регистрация blueprint с префиксом
+    app.register_blueprint(blueprint, url_prefix="/vba")
+
+    # Регистрация обработчиков
+    app.before_request(before_request)
+    app.after_request(after_request)
+
+    return app
 
 
-@app.before_request
 async def before_request() -> None:
     """
     Функция, которая выполняется перед каждым запросом.
@@ -20,14 +33,13 @@ async def before_request() -> None:
       чтобы передать его хендлерам для дальнейшего использования.
     """
 
-    if "db_conn" not in g:
+    if not hasattr(g, 'db_conn'):
         g.db_conn = await get_connection()
 
     return None
 
 
-@app.teardown_appcontext
-def close_connection(exception=None) -> None:
+async def after_request(response: Response) -> Response:
     """
     Функция, которая выполняется после обработки запроса.
 
@@ -35,8 +47,9 @@ def close_connection(exception=None) -> None:
       освобождая ресурсы.
     """
 
-    db_con = g.pop("db_conn", None)
-    if db_con is not None:
-        close_connection(db_con)
+    db_conn: Connection | None = g.pop('db_conn', None)
 
-    return None
+    if db_conn is not None:
+        await close_connection(db_conn)
+
+    return response

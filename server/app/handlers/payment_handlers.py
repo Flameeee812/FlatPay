@@ -1,10 +1,11 @@
-import flask as fl
-from flask import g
+import quart as qa
+from quart import g
+from aiosqlite import Connection
 
 from server.services.db_services import payment_services
 
 
-async def apply_user_payment():
+async def apply_user_payment() -> str:
     """
     Хендлер для страницы оплаты задолженности.
 
@@ -13,21 +14,22 @@ async def apply_user_payment():
     Если оплата прошла успешно, отображается страница с подтверждением оплаты, иначе ошибка.
     """
 
-    if fl.request.method == "GET":
-        return fl.render_template("update_debt.html")
+    if qa.request.method == "GET":
+        return await qa.render_template("update_debt.html")
 
-    elif fl.request.method == "POST":
-        passport = fl.request.form.get("passport")
-        new_payment = fl.request.form.get("new_payment")
-        db_conn = g.db_conn
+    elif qa.request.method == "POST":
+        form_data: dict = await qa.request.form
+        passport: str = form_data.get("passport")
+        new_payment: str = form_data.get("new_payment")
 
+        db_conn: Connection = g.db_conn
         if await payment_services.apply_payment(db_conn, passport, new_payment) is not False:
-            return fl.render_template("successful_update_debt.html", passport=passport)
+            return await qa.render_template("successful_update_debt.html", passport=passport)
 
-        return fl.render_template("lose_update_debt.html")
+        return await qa.render_template("lose_update_debt.html")
 
 
-async def get_debt_info():
+async def get_debt_info() -> str:
     """
     Хендлер для страницы получения информации о задолженности.
 
@@ -36,17 +38,18 @@ async def get_debt_info():
     Если данные о задолженности получены успешно, отображается страница с информацией о задолженности, иначе ошибка.
     """
 
-    if fl.request.method == "GET":
-        return fl.render_template("get_debt.html")
+    if qa.request.method == "GET":
+        return await qa.render_template("get_debt.html")
 
-    elif fl.request.method == "POST":
-        passport = fl.request.form.get("passport")
-        db_conn = g.db_conn
-        new_debt = await payment_services.get_debt(db_conn, passport)
+    elif qa.request.method == "POST":
+        form_data: dict = await qa.request.form
+        passport: str = form_data.get("passport")
 
+        db_conn: Connection = g.db_conn
+        new_debt: str | bool = await payment_services.get_debt(db_conn, passport)
         if new_debt is not False:
-            return fl.render_template("successful_get_debt.html",
-                                      passport=passport,
-                                      new_debt=new_debt)
+            return await qa.render_template("successful_get_debt.html",
+                                            passport=passport,
+                                            new_debt=new_debt)
 
-        return fl.render_template("lose_get_debt.html")
+        return await qa.render_template("lose_get_debt.html")

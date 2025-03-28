@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div>
+    <div class="container">
         <h1>Остаток долга для пользователя с паспортом {{ passport }}</h1>
         <p>Текущий долг: {{ new_debt }} рублей</p>
-        <p>Вернуться на домашнюю страницу: <a href="http://127.0.0.1:5005/vba">Домашняя страница</a></p>
+        <p><a href="http://127.0.0.1:5005/vba">Домашняя страница</a></p>
     </div>
 </body>
+</html>

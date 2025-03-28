@@ -1,4 +1,4 @@
-import flask as fl
+import quart as qa
 
 from server.app.handlers import (
     home_handler, registration, delete_user_passport,
@@ -7,7 +7,7 @@ from server.app.handlers import (
 )
 
 
-blueprint = fl.Blueprint('blueprint', __name__)
+blueprint = qa.Blueprint('blueprint', __name__)
 
 
 @blueprint.route("/", methods=["GET"])
