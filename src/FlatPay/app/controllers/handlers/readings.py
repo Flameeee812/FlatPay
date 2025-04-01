@@ -23,6 +23,9 @@ async def update_user_readings() -> str:
     - Шаблон страницы с результатом обновления показаний счётчиков (успех или ошибка).
     """
     if qa.request.method == "GET":
+        if is_early():
+            return await qa.render_template("early_update_readings.html")
+
         return await qa.render_template("update_readings.html")
 
     elif qa.request.method == "POST":
@@ -38,8 +41,6 @@ async def update_user_readings() -> str:
         )
 
         db_conn: Connection = g.db_conn
-        if is_early():
-            return await qa.render_template("early_update_readings.html")
 
         if await update_readings(db_conn, passport, readings):
             await update_next_debt(db_conn, passport, readings)
