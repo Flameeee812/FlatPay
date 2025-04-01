@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Остаток долга</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Узнать остаток долга</h1>
+        <form action="{{ url_for('blueprint.get_debt') }}" method="post">
+            <div class="form-group">
+                <label for="passport">Введите ваши паспортные данные:</label><br>
+                <input type="text" id="passport" name="passport" required>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Проверить долг">
+            </div>
+        </form>
+        <p><a href="http://127.0.0.1:5005/FlatPay" class="btn-secondary">Домашняя страница</a></p>
+    </div>
+</body>
+</html>

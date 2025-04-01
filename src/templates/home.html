@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Учёт оплаты коммунальных услуг</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Учёт оплаты коммунальных услуг</h1>
+
+        <div class="actions">
+            <a href="http://127.0.0.1:5005/FlatPay/reg_user" class="btn green" target="_blank">Регистрация</a>
+            <a href="http://127.0.0.1:5005/FlatPay/delete_user" class="btn red" target="_blank">Удаление пользователя</a>
+            <a href="http://127.0.0.1:5005/FlatPay/update_readings" class="btn blue">Обновить показания</a>
+            <a href="http://127.0.0.1:5005/FlatPay/get_readings" class="btn purple">Узнать показания</a>
+            <a href="http://127.0.0.1:5005/FlatPay/update_debt" class="btn orange">Оплатить долг</a>
+            <a href="http://127.0.0.1:5005/FlatPay/get_debt" class="btn teal">Узнать остаток долга</a>
+        </div>
+    </div>
+</body>
+</html>
