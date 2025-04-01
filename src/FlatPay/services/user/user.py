@@ -3,6 +3,7 @@ from sqlite3 import Connection, IntegrityError
 
 from FlatPay.database.repositories.user import register_passport_to_db, remove_passport_from_db
 from FlatPay.utils.validators import validate_passport, is_valid_passport, is_passport_numeric
+from FlatPay.utils.formatters import normalize_passport
 from FlatPay.exceptions import PassportNotFoundError, PassportIsNotNumericError, PassportIsInvalidError
 
 
@@ -11,9 +12,10 @@ service_logger = logging.getLogger("user")
 
 async def register_passport(connection: Connection, passport: str) -> bool:
     """
-    Сервис для регистрации нового пользователя в базе данных.
+    Сервис для регистрации нового паспорта в базе данных.
 
     Перед добавлением выполняется проверка корректности введённых паспортных данных.
+    Также производится нормализация номера, удаляя нецифровые символы.
 
     Параметры:
      - connection (Connection): Подключение к базе данных.
@@ -23,21 +25,19 @@ async def register_passport(connection: Connection, passport: str) -> bool:
      - bool: True, если регистрация прошла успешно, иначе False.
     """
 
-    try:
-        is_passport_numeric(passport)
-    except PassportIsNotNumericError as e:
-        service_logger.warning(e)
+    passport = normalize_passport(passport)
+
+    if not is_passport_numeric(passport):
+        service_logger.warning(f"Паспорт содержит нецифровые символы: {passport}")
         return False
 
-    try:
-        is_valid_passport(passport)
-    except PassportIsInvalidError as e:
-        service_logger.warning(e)
+    if not is_valid_passport(passport):
+        service_logger.warning(f"Некорректный номер паспорта: {passport}")
         return False
 
     try:
         await register_passport_to_db(connection, passport)
-        service_logger.info(f"Пользователь {passport} успешно добавлен")
+        service_logger.info(f"Пользователь {passport} успешно добавлен.")
         return True
 
     except IntegrityError as e:
@@ -45,7 +45,7 @@ async def register_passport(connection: Connection, passport: str) -> bool:
         return False
 
     except Exception as e:
-        service_logger.error(f"Ошибка при добавлении пользователя: {e}")
+        service_logger.exception(f"Ошибка при добавлении пользователя: {e}")
         return False
 
 
@@ -71,11 +71,11 @@ async def remove_passport(connection: Connection, passport: str) -> bool:
         return False
 
     try:
+        passport = normalize_passport(passport)
         await remove_passport_from_db(connection, passport)
         service_logger.info(f"Пользователь {passport} удалён из базы.")
         return True
 
     except Exception as e:
-        service_logger.warning(f"Ошибка при удалении пользователя {e}")
+        service_logger.exception(f"Ошибка при удалении пользователя: {e}")
         return False
-

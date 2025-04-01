@@ -1,4 +1,3 @@
-import logging
 from datetime import date
 
 from aiosqlite import Connection
@@ -65,13 +64,13 @@ def is_valid_passport(passport: str) -> bool:
      - PassportIsInvalidError: Если паспорт не соответствует формату.
     """
 
-    if (len("".join(passport.split())) != 10) or (len(passport.split()) != 2):
+    if (len("".join(passport.split())) != 10) and (len(passport.split()) != 2):
         raise PassportIsInvalidError(f"Паспорт {passport} не соответствует формату.")
 
     return True
 
 
-def is_early(passport: str, deadline: int = 24) -> bool:
+def is_early(deadline: int = 24) -> bool:
     """
     Проверяет, можно ли вносить показания счётчиков на текущий день.
 
@@ -79,7 +78,6 @@ def is_early(passport: str, deadline: int = 24) -> bool:
     В этом случае логируется попытка раннего внесения.
 
     Параметры:
-     - passport (str): Номер паспорта пользователя.
      - deadline (int): Первый день месяца, после которого разрешено внесение (по умолчанию 24).
 
     Возвращаемые значения:

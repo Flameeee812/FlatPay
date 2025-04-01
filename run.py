@@ -3,9 +3,9 @@ import logging
 
 import uvicorn
 
-from src.FlatPay.app import setup_app
-from src.FlatPay.core import SettingsManager, LoggerManager
-from src.FlatPay.scheduler import run_scheduler
+from FlatPay.app import setup_app
+from FlatPay.core import SettingsManager, setup_logger
+from FlatPay.scheduler import run_scheduler
 
 
 async def main(db_path):
@@ -19,15 +19,15 @@ async def main(db_path):
     4. Обработка исключений и корректное завершение работы
 
     Гарантирует:
-    - Освобождение ресурсов планировщика при завершении
-    - Логирование критических ошибок
-    - Graceful shutdown при получении сигналов остановки
+    - Корректное завершение работы планировщика при остановке приложения.
+    - Логирование критических ошибок.
+    - Плавное завершение работы при получении сигнала остановки.
     """
 
     # Создание ASGI-приложения
     app = setup_app()
 
-    # Инициализация планировщика фоновых задач
+    # Запуск планировщика задач
     await run_scheduler(db_path=db_path)
 
     try:
@@ -35,7 +35,7 @@ async def main(db_path):
 
         # Настраиваем uvicorn сервер
         server_config = uvicorn.Config(
-            app,
+            app,  # Приложение
             host="127.0.0.1",  # Локальный интерфейс
             port=5005,  # Порт по умолчанию
             reload=True)  # Автоперезагрузка в development
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     config = SettingsManager.get_config()
 
     # Настройка системы логирования
-    LoggerManager.setup(config=config)
+    setup_logger(config=config)
     app_logger = logging.getLogger("main")
 
     try:

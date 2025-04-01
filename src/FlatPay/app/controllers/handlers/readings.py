@@ -38,7 +38,7 @@ async def update_user_readings() -> str:
         )
 
         db_conn: Connection = g.db_conn
-        if is_early(passport):
+        if is_early():
             return await qa.render_template("early_update_readings.html")
 
         if await update_readings(db_conn, passport, readings):
