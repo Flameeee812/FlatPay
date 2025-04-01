@@ -2,7 +2,7 @@ import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from FlatPay.utils.schedulers import run_background_tasks
-from FlatPay.exceptions import SchedulerStartupError
+from FlatPay.core.exceptions import SchedulerStartupError
 
 
 scheduler_logger = logging.getLogger("scheduler")

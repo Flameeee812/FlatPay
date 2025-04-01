@@ -7,7 +7,7 @@ from FlatPay.database.repositories.readings import (
 from FlatPay.utils.formatters import normalize_passport
 from FlatPay.utils.validators import validate_passport
 from FlatPay.app.models import Readings
-from FlatPay.exceptions.exceptions import PassportIsNotNumericError, PassportNotFoundError, PassportIsInvalidError
+from FlatPay.core.exceptions import PassportIsNotNumericError, PassportNotFoundError, PassportIsInvalidError
 
 
 service_logger = logging.getLogger("readings")

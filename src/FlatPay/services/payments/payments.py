@@ -10,7 +10,7 @@ from FlatPay.utils.debt_calculator import calculate_base_debt
 from FlatPay.utils.formatters import normalize_passport
 from FlatPay.utils.validators import validate_passport
 from FlatPay.app.models import Readings, NewPayment
-from FlatPay.exceptions import PassportIsNotNumericError, PassportNotFoundError, PassportIsInvalidError
+from FlatPay.core.exceptions import PassportIsNotNumericError, PassportNotFoundError, PassportIsInvalidError
 
 
 service_logger = logging.getLogger("payments")

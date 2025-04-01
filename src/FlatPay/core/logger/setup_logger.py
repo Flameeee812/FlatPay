@@ -3,7 +3,7 @@ import logging.config
 import yaml
 
 from FlatPay.core.config import Config
-from FlatPay.exceptions import LoggerSetupError
+from FlatPay.core.exceptions import LoggerSetupError
 
 
 def setup_logger(config: Config) -> None:

@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from FlatPay.database import get_connection
 from FlatPay.services.payments import update_current_debt
 from FlatPay.services.readings import reset_readings
-from FlatPay.exceptions import SchedulerAddTasksError
+from FlatPay.core.exceptions import SchedulerAddTasksError
 
 
 scheduler_logger = logging.getLogger("schedulers")

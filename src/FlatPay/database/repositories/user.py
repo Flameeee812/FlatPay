@@ -1,7 +1,5 @@
 from aiosqlite import Connection
 
-from FlatPay.exceptions.exceptions import PassportNotFoundError
-
 
 async def register_passport_to_db(connection: Connection, passport: str) -> None:
     """

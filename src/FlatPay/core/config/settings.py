@@ -2,13 +2,13 @@ from dataclasses import dataclass
 
 from environs import Env
 
-from FlatPay.exceptions import ConfigLoadError, ConfigGetError
+from FlatPay.core.exceptions import ConfigLoadError, ConfigGetError
 
 
-@dataclass
+@dataclass(frozen=True)
 class Config:
     """
-    Класс для хранения конфигурационных данных.
+    Неизменяемый класс для хранения конфигурационных данных.
 
     Атрибуты:
      - DATABASE_PATH (str): Путь к файлу базы данных.

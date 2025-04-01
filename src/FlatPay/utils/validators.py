@@ -3,7 +3,7 @@ from datetime import date
 from aiosqlite import Connection
 
 from FlatPay.database.repositories.user import fetch_user_passport
-from FlatPay.exceptions.exceptions import PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError
+from FlatPay.core.exceptions import PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError
 
 
 async def validate_passport(connection: Connection, passport: str) -> None:

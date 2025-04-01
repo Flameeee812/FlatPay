@@ -2,7 +2,7 @@ import logging
 
 from aiosqlite import Connection, connect
 
-from FlatPay.exceptions import DatabaseConnectionError, DatabaseCloseError
+from FlatPay.core.exceptions import DatabaseConnectionError, DatabaseCloseError
 
 
 connection_logger = logging.getLogger("connection")

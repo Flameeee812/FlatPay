@@ -4,7 +4,7 @@ from sqlite3 import Connection, IntegrityError
 from FlatPay.database.repositories.user import register_passport_to_db, remove_passport_from_db
 from FlatPay.utils.validators import validate_passport, is_valid_passport, is_passport_numeric
 from FlatPay.utils.formatters import normalize_passport
-from FlatPay.exceptions import PassportNotFoundError, PassportIsNotNumericError, PassportIsInvalidError
+from FlatPay.core.exceptions import PassportNotFoundError, PassportIsNotNumericError, PassportIsInvalidError
 
 
 service_logger = logging.getLogger("user")
