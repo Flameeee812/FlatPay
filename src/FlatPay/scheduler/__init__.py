@@ -1,1 +1,1 @@
-from .scheduler import run_scheduler
+from .scheduler import run_scheduler, end_scheduler

@@ -1,14 +1,15 @@
 import asyncio
 import logging
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import uvicorn
 
 from FlatPay.app import setup_app
 from FlatPay.core import SettingsManager, setup_logger
-from FlatPay.scheduler import run_scheduler
+from FlatPay.scheduler import run_scheduler, end_scheduler
 
 
-async def main(db_path):
+async def main(db_path: str):
     """
     Основной цикл работы приложения.
 
@@ -27,8 +28,10 @@ async def main(db_path):
     # Создание ASGI-приложения
     app = setup_app()
 
-    # Запуск планировщика задач
-    await run_scheduler(db_path=db_path)
+    # Инициализируем и запускаем планировщик задач
+    scheduler = AsyncIOScheduler()
+    run_scheduler(scheduler=scheduler, db_path=db_path)
+    app_logger.info("Планировщик задач запущен")
 
     try:
         app_logger.info("Приложение запущено")
@@ -46,6 +49,10 @@ async def main(db_path):
 
     except Exception as e:
         app.logger.exception(f"Произошла ошибка: {e}")
+
+    finally:
+        end_scheduler(scheduler=scheduler)
+        app_logger.info("Планировщик задач остановлен")
 
 
 if __name__ == "__main__":

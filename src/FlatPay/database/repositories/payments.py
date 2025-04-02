@@ -32,7 +32,7 @@ async def reset_next_month_debt(connection: Connection) -> None:
     await connection.execute(
         """
         UPDATE Taxpayers 
-        "SET next_month_debt = 0
+        SET next_month_debt = 0
         """
     )
 

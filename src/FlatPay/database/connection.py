@@ -8,7 +8,7 @@ from FlatPay.core.exceptions import DatabaseConnectionError, DatabaseCloseError
 connection_logger = logging.getLogger("connection")
 
 
-async def get_connection(path):
+async def get_connection(path) -> Connection:
     """
     Утилита для получения асинхронного соединения с базой данных.
 
@@ -32,7 +32,7 @@ async def get_connection(path):
         raise DatabaseConnectionError(f"Не удалось подключиться к базе данных") from e
 
 
-async def create_table(connection: Connection):
+async def create_table(connection: Connection) -> None:
     """
     Утилита для создания таблицы `Taxpayers` в базе данных, если она не существует.
 
