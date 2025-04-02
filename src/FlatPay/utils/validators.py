@@ -2,6 +2,7 @@ from datetime import date
 
 from aiosqlite import Connection
 
+from FlatPay.utils.formatters import normalize_passport
 from FlatPay.database.repositories.user import fetch_user_passport
 from FlatPay.core.exceptions import PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError
 
@@ -20,6 +21,7 @@ async def validate_passport(connection: Connection, passport: str) -> None:
     - PassportNotFoundError: Если паспорт не найден в базе.
     """
 
+    passport = normalize_passport(passport)
     if not is_passport_numeric(passport):
         raise PassportIsNotNumericError(f"Паспорт {passport} содержит недопустимые символы.")
 
