@@ -27,11 +27,15 @@ async def register_passport(connection: Connection, passport: str) -> bool:
 
     passport = normalize_passport(passport)
 
-    if not is_passport_numeric(passport):
+    try:
+        is_passport_numeric(passport)
+    except PassportIsNotNumericError:
         service_logger.warning(f"Паспорт содержит нецифровые символы: {passport}")
         return False
 
-    if not is_valid_passport(passport):
+    try:
+        is_valid_passport(passport)
+    except PassportIsInvalidError:
         service_logger.warning(f"Некорректный номер паспорта: {passport}")
         return False
 
