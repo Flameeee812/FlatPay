@@ -1,15 +1,14 @@
 import asyncio
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
 import uvicorn
 
 from FlatPay.core import setup_app
-from FlatPay.core import SettingsManager, setup_logger
-from FlatPay.scheduler import run_scheduler, end_scheduler
+from FlatPay.core import SettingsManager, Config, setup_logger
+from FlatPay.tasks.scheduler import run_scheduler, end_scheduler
 
 
-async def main(db_path: str):
+async def main(app_config: Config):
     """
     Основной цикл работы приложения.
 
@@ -25,48 +24,53 @@ async def main(db_path: str):
     - Плавное завершение работы при получении сигнала остановки.
     """
 
-    # Создание ASGI-приложения
-    app = setup_app()
+    # Инициализируем Quart-приложение
+    app = setup_app(app_config.SECRET_KEY)
+    logger.info("Приложение запущено")
 
-    # Инициализируем и запускаем планировщик задач
+    # Инициализируем асинхронный планировщик задач
     scheduler = AsyncIOScheduler()
-    run_scheduler(scheduler=scheduler, db_path=db_path)
-    app_logger.info("Планировщик задач запущен")
 
     try:
-        app_logger.info("Приложение запущено")
+        # Добавляем задачи и запускаем scheduler
+        run_scheduler(scheduler=scheduler, db_path=app_config.DATABASE_PATH)
+        logger.info("Планировщик задач запущен")
 
-        # Настраиваем uvicorn сервер
+        # Конфигурация Uvicorn-сервера (ASGI)
         server_config = uvicorn.Config(
-            app,  # Приложение
-            host="127.0.0.1",  # Локальный интерфейс
-            port=5005,  # Порт по умолчанию
-            reload=True)  # Автоперезагрузка в development
+            app=app,           # Quart-приложение как ASGI-объект
+            host="127.0.0.1",  # Только локально. Поставь "0.0.0.0", чтобы открыть извне
+            port=5005,         # Порт
+            reload=True        # Автоперезапуск при изменениях (dev-режим)
+        )
 
         app.logger.info("Старт сервера на http://127.0.0.1:5005")
+
         server = uvicorn.Server(server_config)
-        await server.serve()
+        await server.serve()  # Блокирующий запуск
 
     except Exception as e:
         app.logger.exception(f"Произошла ошибка: {e}")
 
     finally:
         end_scheduler(scheduler=scheduler)
-        app_logger.info("Планировщик задач остановлен")
+        logger.info("Планировщик задач остановлен")
 
 
+# Точка входа в приложение
 if __name__ == "__main__":
-
-    # Инициализация конфигурации
+    # Загружаем конфигурацию из .env
     SettingsManager.load_config()
-    config = SettingsManager.get_config()
+    config: Config = SettingsManager.get_config()
 
-    # Настройка системы логирования
+    # Настраиваем систему логирования согласно YAML-конфигурации
     setup_logger(config=config)
-    app_logger = logging.getLogger("main")
+    logger = logging.getLogger("main")
 
     try:
-        asyncio.run(main(config.DATABASE_PATH))
+        # Запускаем event loop и main()
+        asyncio.run(main(app_config=config))
 
     except KeyboardInterrupt:
-        app_logger.info("Приложение завершено")
+        # Завершение по Ctrl+C
+        logger.info("Приложение завершено")
