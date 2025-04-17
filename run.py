@@ -4,7 +4,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import uvicorn
 
-from FlatPay.app import setup_app
+from FlatPay.core import setup_app
 from FlatPay.core import SettingsManager, setup_logger
 from FlatPay.scheduler import run_scheduler, end_scheduler
 

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FlatPay — Учёт коммунальных услуг</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="auth-buttons">
+            <a href="{{ url_for('blueprint.logout') }}" class="btn green">Выйти</a>
+        </div>
+    </nav>
+
+    <!-- Контент -->
+    <div class="container">
+        <header class="fade-in">
+            <h1>FlatPay</h1>
+            <p class="description">Добро пожаловать, {{ email }}! <br> Управляйте показаниями и задолженностями легко!</p>
+        </header>
+
+        <section class="actions-section fade-in">
+            <div class="actions">
+                <a href="{{ url_for('blueprint.update_readings') }}" class="btn primary error-link">Обновить показания</a>
+                <a href="{{ url_for('blueprint.get_readings') }}" class="btn primary error-link">Узнать показания</a>
+                <a href="{{ url_for('blueprint.update_debt') }}" class="btn primary error-link">Оплатить долг</a>
+                <a href="{{ url_for('blueprint.get_debt') }}" class="btn primary error-link">Узнать остаток долга</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

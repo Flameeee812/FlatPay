@@ -1,1 +1,1 @@
-from .models import Readings, NewPayment
+from .models import Readings, Payment, User

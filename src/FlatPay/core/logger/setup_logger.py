@@ -17,10 +17,13 @@ def setup_logger(config: Config) -> None:
     """
 
     try:
+        # Открываем YAML-файл с конфигурацией логирования по указанному пути
         with open(file=config.LOG_CONFIG_PATH, mode="rt") as f:
             log_config = yaml.safe_load(f)
 
+        # Применяем конфигурацию логгирования (устанавливаем уровни, хендлеры, форматтеры и т.д.)
         logging.config.dictConfig(log_config)
 
     except Exception as e:
+        # При любой ошибке — выбрасываем собственное исключение
         raise LoggerSetupError(f"Ошибка при конфигурации логгирования: {e}")

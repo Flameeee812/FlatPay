@@ -17,6 +17,7 @@ class Config:
 
     DATABASE_PATH: str
     LOG_CONFIG_PATH: str
+    SECRET_KEY: str
 
 
 class SettingsManager:
@@ -39,17 +40,21 @@ class SettingsManager:
          - Config: Экземпляр класса с загруженными настройками.
         """
 
-        env = Env()
-        env.read_env(path)  # Чтение файла .env
+        env = Env()  # Инициализация объекта окружения
+        env.read_env(path)  # Загружаем переменные окружения из .env файла
 
         try:
+            # Читаем переменные и создаём объект конфигурации
             config = Config(
                 DATABASE_PATH=env.str("DATABASE_PATH"),
-                LOG_CONFIG_PATH=env.str("LOG_CONFIG_PATH")
+                LOG_CONFIG_PATH=env.str("LOG_CONFIG_PATH"),
+                SECRET_KEY=env.str("SECRET_KEY")
             )
+            # Сохраняем объект в классовую переменную
             cls._config = config
 
         except Exception as e:
+            # Если что-то пошло не так — выбрасываем собственное исключение
             raise ConfigLoadError(f"Ошибка загрузки конфигурации: {e}")
 
     @classmethod

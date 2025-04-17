@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ошибка</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="auth-buttons">
+            <a href="{{ url_for('blueprint.homepage') }}" class="btn secondary">На главную</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>При регистрации возникла ошибка</h1>
+        <p>Что бы повторить попытку, перейдите в форму для регистрации:</p>
+        <p><a href="{{ url_for('blueprint.register') }}" class="btn primary error-link">Регистрация в базе данных</a></p>
+    </div>
+</body>
+</html>

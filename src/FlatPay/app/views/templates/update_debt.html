@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Оплатить долг</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+    <div class="container fade-in">
+        <h1>Оплата долга</h1>
+        <form action="{{ url_for('blueprint.update_debt') }}" method="post">
+            <div class="form-group">
+                <label for="new_payment">Введите оплату:</label><br>
+                <input type="text" id="new_payment" name="new_payment" required class="input"><br><br>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Оплатить" class="btn primary">
+            </div>
+        </form>
+        <p><a href="{{ url_for('blueprint.homepage') }}" class="btn secondary error-link">Домашняя страница</a></p>
+    </div>
+</body>
+</html>

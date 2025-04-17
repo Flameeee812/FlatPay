@@ -1,145 +1,125 @@
 import logging
 from asyncio import create_task, gather
-from sqlite3 import Connection
 
-from FlatPay.database.repositories.payments import (
-    apply_user_payment, update_current_month_debt,
-    update_next_month_debt, fetch_user_debt, reset_next_month_debt
+from aiosqlite import Connection
+from pydantic import EmailStr
+
+from FlatPay.database.repositories.payments_repo import (
+    apply_user_payment_repo, update_current_month_debt_repo,
+    update_next_month_debt_repo, fetch_current_debt_repo, reset_next_month_debt_repo
 )
-from FlatPay.utils.debt_calculator import calculate_base_debt
-from FlatPay.utils.formatters import normalize_passport
-from FlatPay.utils.validators import validate_passport
-from FlatPay.app.models import Readings, NewPayment
-from FlatPay.core.exceptions import PassportIsNotNumericError, PassportNotFoundError, PassportIsInvalidError
+from FlatPay.utils.calculate_base_debt import calculate_base_debt
+from FlatPay.app.models import Readings, Payment
 
 
-service_logger = logging.getLogger("payments")
+# Инициализируем логирование
+logger = logging.getLogger("payments_services")
 
 
 async def update_current_debt(connection: Connection) -> None:
     """
-    Сервис, передающий значение долга из столбца next_month_debt в debt.
+    Сервис для переноса задолженности на текущий расчётный месяц.
 
-    После выполнения операции столбец next_month_debt обнуляется.
+    Переносит значение из столбца next_month_debt в столбец debt,
+    после чего обнуляет next_month_debt.
 
     Параметры:
      - connection (Connection): Асинхронное соединение с базой данных.
-
-    Возвращаемое значение:
-     - None
     """
 
     try:
-        task1 = create_task(update_current_month_debt(connection))
-        task2 = create_task(reset_next_month_debt(connection))
+        # Создаем задачу, складывающую current_month_debt и next_month_debt
+        task1 = create_task(update_current_month_debt_repo(connection))
+        # Создаем задачу,обнуляющую next_month_debt
+        task2 = create_task(reset_next_month_debt_repo(connection))
 
         await gather(task1, task2)
-        service_logger.info("Долг успешно перенесён в debt.")
+        logger.info("Долг успешно перенесён в debt.")
 
     except Exception as e:
-        service_logger.exception(f"Ошибка при попытке перенести долг: {e}")
+        logger.exception(f"Ошибка при попытке перенести долг: {e}")
 
 
-async def update_next_debt(connection: Connection, passport: str, readings: Readings) -> bool:
+async def update_next_debt(connection: Connection, email: EmailStr, readings: Readings) -> bool:
     """
-    Сервис для обновления столбца next_month_debt после внесения показаний счётчиков.
+    Сервис для расчёта и сохранения долга на следующий месяц.
 
-    Для указанного пользователя рассчитывается новый долг на основании потребления ресурсов
-    (исходя из переданных показаний счётчиков), после чего обновляется значение в столбце
-    next_month_debt в базе данных.
+    Вычисляет задолженность на основе новых показаний счётчиков
+    и сохраняет её в столбец next_month_debt.
 
     Параметры:
      - connection (Connection): Асинхронное соединение с базой данных.
-     - passport (str): Номер паспорта пользователя.
-     - readings (Readings): Показания счётчиков для расчёта долга.
+     - email (EmailStr): Электронная почта пользователя.
+     - readings (Readings): Показания счётчиков.
 
     Возвращаемое значение:
-     - bool: True, если столбец next_month_debt успешно обновлён, иначе False.
+     - bool: True, если значение успешно обновлено, иначе False.
     """
 
     try:
-        await validate_passport(connection, passport)
-    except (PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError) as e:
-        service_logger.warning(e)
-        return False
+        # Высчитываем долг по казанскому тарифу
+        debt: float = calculate_base_debt(readings)
 
-    try:
-        passport = normalize_passport(passport)
-        debt = calculate_base_debt(readings)
-        await update_next_month_debt(connection, debt, passport)
-        service_logger.info(f"next_month_debt для {passport} успешно обновлён.")
+        # Передаем значение debt в столбец next_month_debt
+        await update_next_month_debt_repo(connection, debt, email)
+        logger.info(f"next_month_debt для {email} успешно обновлён.")
         return True
 
     except Exception as e:
-        service_logger.exception(f"Ошибка при обновлении next_month_debt: {e}")
+        logger.exception(f"Ошибка при обновлении next_month_debt: {e}")
         return False
 
 
-async def apply_payment(connection: Connection, passport: str, new_payment: NewPayment) -> bool:
+async def apply_payment(connection: Connection, email: EmailStr, payment: Payment) -> bool:
     """
-    Сервис для применения платежа и обновления задолженности пользователя.
+    Сервис для применения оплаты и обновления текущей задолженности.
 
-    Проверяет корректность данных о пользователе, рассчитывает новый долг
-    на основе внесённой оплаты и обновляет его в базе данных.
+    Вычитает сумму оплаты из текущего долга и сохраняет новое значение.
 
     Параметры:
      - connection (Connection): Асинхронное соединение с базой данных.
-     - passport (str): Номер паспорта пользователя.
-     - new_payment (NewPayment): Сумма оплаты задолженности.
+     - email (EmailStr): Электронная почта пользователя.
+     - new_payment (NewPayment): Данные об оплате.
 
     Возвращаемое значение:
-     - bool: True, если оплата прошла успешно и долг был обновлён, иначе False.
+     - bool: True, если оплата успешно применена, иначе False.
     """
 
     try:
-        await validate_passport(connection, passport)
-    except (PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError) as e:
-        service_logger.warning(e)
-        return False
+        # Получаем значение из столбца current_month_debt
+        current_month_debt: float = await fetch_current_debt_repo(connection, email)
 
-    try:
-        passport = normalize_passport(passport)
-        debt = await fetch_user_debt(connection, passport)
+        # Высчитываем остаток долга за текущий месяц
+        new_debt = current_month_debt - payment.amount
 
-        if debt is None:
-            service_logger.warning(f"Не удалось получить долг пользователя {passport}")
-            return False
-
-        new_debt = debt - new_payment.amount
-
-        await apply_user_payment(connection, new_payment, new_debt, passport)
-        service_logger.info(f"Оплата для {passport} прошла успешно")
+        # Передаем значение new_debt в столбец current_month_debt
+        await apply_user_payment_repo(connection, payment, new_debt, email)
+        logger.info(f"Оплата для {email} прошла успешно")
         return True
 
     except ValueError as e:
-        service_logger.exception(f"Введён неверный тип данных в параметр new_payment: {e}")
+        logger.exception(f"Введён неверный тип данных в параметр new_payment: {e}")
         return False
 
 
-async def get_debt(connection: Connection, passport: str) -> float | bool:
+async def get_current_debt(connection: Connection, email: EmailStr) -> float | bool:
     """
     Сервис для получения информации о текущей задолженности пользователя.
 
     Параметры:
      - connection (Connection): Асинхронное соединение с базой данных.
-     - passport (str): Номер паспорта пользователя.
+     - email (EmailStr): Электронная почта пользователя.
 
     Возвращаемое значение:
-     - float: Текущий долг пользователя, если он есть.
-     - bool: False, если долг отсутствует или произошла ошибка.
+     - float: Текущая сумма долга, если она найдена.
+     - bool: False, если произошла ошибка.
     """
 
     try:
-        await validate_passport(connection, passport)
-    except (PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError) as e:
-        service_logger.warning(e)
-        return False
-
-    try:
-        passport = normalize_passport(passport)
-        debt = await fetch_user_debt(connection, passport)
-        return debt if debt is not None else False
+        # Получаем значение из столбца current_month_debt
+        current_debt = await fetch_current_debt_repo(connection, email)
+        return current_debt
 
     except Exception as e:
-        service_logger.exception(f"Ошибка при попытке отобразить данные о задолженности: {e}")
+        logger.exception(f"Ошибка при попытке отобразить данные о задолженности: {e}")
         return False

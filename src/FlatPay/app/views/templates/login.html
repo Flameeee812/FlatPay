@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — FlatPay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="auth-buttons">
+            <a href="{{ url_for('blueprint.register') }}" class="btn green">Регистрация</a>
+        </div>
+    </nav>
+
+    <div class="container fade-in">
+        <h1 class="brand">Вход в систему</h1>
+
+        <form id="loginForm" class="auth-form" method="POST" action="{{ url_for('blueprint.login') }}">
+            <div class="form-group">
+                <label for="email">Электронная почта</label>
+                <input type="email" id="email" name="email" required class="input" placeholder="Введите ваш email">
+                <div class="error-message" id="email-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required class="input" placeholder="Введите ваш пароль">
+                <div class="error-message" id="password-error"></div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn primary error-link">Войти</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

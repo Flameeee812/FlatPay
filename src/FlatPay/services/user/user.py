@@ -1,85 +1,41 @@
 import logging
-from sqlite3 import Connection, IntegrityError
 
-from FlatPay.database.repositories.user import register_passport_to_db, remove_passport_from_db
-from FlatPay.utils.validators import validate_passport, is_valid_passport, is_passport_numeric
-from FlatPay.utils.formatters import normalize_passport
-from FlatPay.core.exceptions import PassportNotFoundError, PassportIsNotNumericError, PassportIsInvalidError
+from aiosqlite import Connection, IntegrityError
+from pydantic import EmailStr
 
-
-service_logger = logging.getLogger("user")
+from FlatPay.database.repositories.user_repo import register_user_repo
 
 
-async def register_passport(connection: Connection, passport: str) -> bool:
+# Инициализируем логирование
+logger = logging.getLogger("user_services")
+
+
+async def register_user(connection: Connection, email: EmailStr, password: str) -> bool:
     """
-    Сервис для регистрации нового паспорта в базе данных.
+    Сервис для регистрации нового пользователя в базе данных.
 
-    Перед добавлением выполняется проверка корректности введённых паспортных данных.
-    Также производится нормализация номера, удаляя нецифровые символы.
+    Выполняет проверку корректности данных перед добавлением пользователя
+    в базу данных.
 
     Параметры:
      - connection (Connection): Подключение к базе данных.
-     - passport (str): Паспортные данные пользователя.
+     - email (EmailStr): Электронная почта пользователя.
+     - password (str): Пароль пользователя.
 
     Возвращаемое значение:
-     - bool: True, если регистрация прошла успешно, иначе False.
+     - bool: True, если регистрация прошла успешно; False в случае ошибки.
     """
 
-    passport = normalize_passport(passport)
-
     try:
-        is_passport_numeric(passport)
-    except PassportIsNotNumericError:
-        service_logger.warning(f"Паспорт содержит нецифровые символы: {passport}")
-        return False
-
-    try:
-        is_valid_passport(passport)
-    except PassportIsInvalidError:
-        service_logger.warning(f"Некорректный номер паспорта: {passport}")
-        return False
-
-    try:
-        await register_passport_to_db(connection, passport)
-        service_logger.info(f"Пользователь {passport} успешно добавлен.")
+        # Регистрируем пользователя в системе
+        await register_user_repo(connection, email, password)
+        logger.info(f"Пользователь {email} успешно добавлен.")
         return True
 
     except IntegrityError as e:
-        service_logger.error(f"Ошибка целостности данных: {e}")
+        logger.error(f"Ошибка целостности данных: {e}")
         return False
 
     except Exception as e:
-        service_logger.exception(f"Ошибка при добавлении пользователя: {e}")
-        return False
-
-
-async def remove_passport(connection: Connection, passport: str) -> bool:
-    """
-    Сервис для удаления пользователя из базы данных.
-
-    Перед удалением проверяется корректность паспортных данных.
-    Если пользователь не найден, записывается предупреждение в лог.
-
-    Параметры:
-     - connection (Connection): Подключение к базе данных.
-     - passport (str): Паспортные данные пользователя.
-
-    Возвращаемое значение:
-     - bool: True, если пользователь успешно удалён, иначе False.
-    """
-
-    try:
-        await validate_passport(connection, passport)
-    except (PassportIsNotNumericError, PassportIsInvalidError, PassportNotFoundError) as e:
-        service_logger.warning(e)
-        return False
-
-    try:
-        passport = normalize_passport(passport)
-        await remove_passport_from_db(connection, passport)
-        service_logger.info(f"Пользователь {passport} удалён из базы.")
-        return True
-
-    except Exception as e:
-        service_logger.exception(f"Ошибка при удалении пользователя: {e}")
+        logger.exception(f"Ошибка при добавлении пользователя: {e}")
         return False

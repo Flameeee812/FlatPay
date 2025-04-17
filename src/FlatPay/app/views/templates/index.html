@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlatPay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="auth-buttons">
+            <a href="{{ url_for('blueprint.login') }}" class="btn green">Войти</a>
+        </div>
+    </div>
+
+    <div class="container hero">
+        <h1>Добро пожаловать в <span class="brand">FlatPay</span></h1>
+        <p class="subtitle">Удобный сервис для учета и оплаты коммунальных услуг.<br>
+           Контролируй расходы — просто, быстро и наглядно.</p>
+
+        <div class="actions">
+            <a href="{{ url_for('blueprint.dashboard') }}" class="btn primary error-link">Начать пользоваться</a>
+        </div>
+    </div>
+
+</body>
+</html>

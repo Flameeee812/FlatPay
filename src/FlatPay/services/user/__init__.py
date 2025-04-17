@@ -1,1 +1,1 @@
-from .user import register_passport, remove_passport
+from .user import register_user

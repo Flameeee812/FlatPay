@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Успешно</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Показания счётчиков для {{ passport }}</h1> <br>
+            Электричество: {{ electricity }} <br>
+            Холодная вода: {{ cold_water }} <br>
+            Горячая вода: {{ hot_water }} <br>
+            Газ: {{ gas }} <br>
+        <p><a href="{{ url_for('blueprint.homepage') }}" class="btn secondary error-link">Домашняя страница</a></p>
+    </div>
+</body>
+</html>

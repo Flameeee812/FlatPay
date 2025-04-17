@@ -8,7 +8,7 @@ from FlatPay.core.exceptions import DatabaseConnectionError, DatabaseCloseError
 connection_logger = logging.getLogger("connection")
 
 
-async def get_connection(path) -> Connection:
+async def get_connection(path: str) -> Connection:
     """
     Утилита для получения асинхронного соединения с базой данных.
 
@@ -23,7 +23,9 @@ async def get_connection(path) -> Connection:
     """
 
     try:
+        # Подключаемся к базе данных асинхронно
         connection: Connection = await connect(path, check_same_thread=False)
+        # Создаем таблицу, если её нет (если таблица уже есть, она не будет перезаписана)
         await create_table(connection)
         return connection
 
@@ -43,17 +45,19 @@ async def create_table(connection: Connection) -> None:
      - Если таблица уже существует, она не будет перезаписана.
     """
 
+    # SQL запрос для создания таблицы
     await connection.execute('''
-    CREATE TABLE IF NOT EXISTS Taxpayers (
-        id INTEGER PRIMARY KEY,
-        passport TEXT NOT NULL UNIQUE,
+    CREATE TABLE IF NOT EXISTS Taxpayers ( 
+        email TEXT PRIMARY KEY,
+        password TEXT,
+        salt TEXT,
         electricity INTEGER DEFAULT 0,
         cold_water INTEGER DEFAULT 0,
         hot_water INTEGER DEFAULT 0,
         gas INTEGER DEFAULT 0,
-        debt REAL DEFAULT 0.0,
-        last_payment REAL DEFAULT 0.0,
-        next_month_debt REAL DEFAULT 0.0
+        current_month_debt DECIMAL DEFAULT 0.0,
+        last_payment DECIMAL DEFAULT 0.0,
+        next_month_debt DECIMAL DEFAULT 0.0
     )
     ''')
 
@@ -75,9 +79,11 @@ async def close_connection(connection: Connection) -> None:
     """
 
     try:
+        # Закрываем соединение с базой данных
         await connection.close()
 
     except Exception as e:
         connection_logger.error(f"Ошибка при попытки закрыть соединение :{e}")
+        # Поднимаем исключение, чтобы вызвать обработку на более высоком уровне
         raise DatabaseCloseError("Не удалось закрыть соединение") from e
 

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Остаток долга</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Остаток долга для пользователя {{ email }}</h1>
+        <p>Текущий долг: {{ current_debt }} рублей</p>
+        <p><a href="{{ url_for('blueprint.homepage') }}" class="btn secondary error-link">Домашняя страница</a></p>
+    </div>
+</body>
+</html>

@@ -1,84 +1,111 @@
+import logging
+
 import quart as qa
-from quart import g
+from quart import g, session
 from aiosqlite import Connection
+from pydantic import EmailStr
 
 from FlatPay.app.models import Readings
-from FlatPay.services.readings import update_readings, get_readings
 from FlatPay.services.payments import update_next_debt
 from FlatPay.utils.validators import is_early
+from FlatPay.database.repositories.readings_repo import fetch_user_readings_repo, update_user_readings_repo
+
+
+# Инициализируем логирование
+logger = logging.getLogger("readings_handlers")
 
 
 async def update_user_readings() -> str:
     """
-    Хендлер для обработки запросов для обновления показаний счётчиков пользователя.
+    Обработчик обновления показаний счётчиков.
 
-    - В случае GET-запроса возвращает страницу с формой для обновления данных.
-    - В случае POST-запроса обновляет показания счётчиков в базе данных и, если обновление прошло успешно,
-      вызывает обновление долга пользователя. Затем возвращает страницу с подтверждением или ошибкой.
+    GET-запрос:
+     - Если обновление ещё недоступно, отображает предупреждение.
+     - Иначе — отображает форму для ввода показаний.
 
-    Параметры:
-    Нет.
-
-    Возвращаемое значение:
-    - Шаблон страницы с результатом обновления показаний счётчиков (успех или ошибка).
+    POST-запрос:
+     - Валидирует данные показаний счётчиков и обновляет задолженность пользователя.
+     - Возвращает HTML-страницу с оповещением об успешном обновлении или с сообщением об ошибке.
     """
-    if qa.request.method == "GET":
-        if is_early():
-            return await qa.render_template("early_update_readings.html")
 
-        return await qa.render_template("update_readings.html")
+    request = qa.request
+    # Получаем соединение с базой данных
+    connection: Connection = g.db_conn
+    # Получаем email пользователя из сессии
+    email: EmailStr = session.get("user_email")
 
-    elif qa.request.method == "POST":
-        form_data: dict = await qa.request.form
-        passport: str = form_data.get("passport")
+    if request.method == "GET":
+        # Если обновление недоступно (по дате), показываем предупреждение
+        template = "early_update_readings.html" if is_early() else "update_readings.html"
+        return await qa.render_template(template)
+
+    elif request.method == "POST":
+        # Получаем данные из формы и создаем объект с показаниями
+        form_data = await request.form
         readings = Readings(
             meter_readings={
-                "electricity": form_data.get("electricity", 0) or 0,
-                "cold_water": form_data.get("cold_water", 0) or 0,
-                "hot_water": form_data.get("hot_water", 0) or 0,
-                "gas": form_data.get("gas") or 0
+                "electricity": float(form_data.get("electricity") or 0),
+                "cold_water": float(form_data.get("cold_water") or 0),
+                "hot_water": float(form_data.get("hot_water") or 0),
+                "gas": float(form_data.get("gas") or 0)
             }
         )
 
-        db_conn: Connection = g.db_conn
+        try:
+            # Обновляем показания и задолженность пользователя
+            await update_user_readings_repo(connection, email, readings)
+            await update_next_debt(connection, email, readings)
 
-        if await update_readings(db_conn, passport, readings):
-            await update_next_debt(db_conn, passport, readings)
-            return await qa.render_template("successful_update_readings.html", passport=passport)
+            # Отправляем страницу с подтверждением успеха
+            return await qa.render_template("successful_update_readings.html", email=email)
 
-        return await qa.render_template("lose_update_readings.html")
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении показаний для {email}: {e}")
+
+            # Отправляем страницу с ошибкой
+            return await qa.render_template("lose_update_readings.html")
 
 
 async def get_readings_info() -> str:
     """
-    Хендлер для обработки запросов для получения информации о показаниях счётчиков пользователя.
+    Обработчик получения показаний счётчиков.
 
-    - В случае GET-запроса возвращает страницу с формой для получения данных.
-    - В случае POST-запроса извлекает показания из базы данных и отображает их пользователю.
-    - Если данные о показаниях не найдены, возвращается ошибка.
-
-    Параметры:
-    Нет.
+    GET-запрос:
+        - Извлекает email пользователя из сессии, получает показания из базы данных
+          и отображает их в HTML-формате.
 
     Возвращаемое значение:
-    - Шаблон страницы с результатами получения показаний счётчиков (успех или ошибка).
+        - str: HTML-страница с информацией о показаниях или с сообщением об ошибке.
     """
-    if qa.request.method == "GET":
-        return await qa.render_template("get_readings.html")
 
-    elif qa.request.method == "POST":
-        form_data: dict = await qa.request.form
-        passport: str = form_data.get("passport")
+    # Обрабатываем только GET-запрос
+    request = qa.request
+    # Получаем соединение с базой данных
+    connection: Connection = g.db_conn
+    # Получаем email пользователя из сессии
+    email: EmailStr = session.get("user_email")
 
-        db_conn: Connection = g.db_conn
-        readings: tuple | bool = await get_readings(db_conn, passport)
+    if request.method == "GET":
 
-        if readings is not False:
-            return await qa.render_template("successful_get_readings.html",
-                                            passport=passport,
-                                            electricity=readings[0],
-                                            cold_water=readings[1],
-                                            hot_water=readings[2],
-                                            gas=readings[3])
+        try:
+            # Получаем показания из базы
+            readings = await fetch_user_readings_repo(connection, email)
 
-        return await qa.render_template("lose_get_readings.html")
+            # Делаем распаковку значений для удобства
+            electricity, cold_water, hot_water, gas = readings
+
+            # Отправляем страницу с показаниями
+            return await qa.render_template(
+                "user_readings.html",
+                passport=email,
+                electricity=electricity,
+                cold_water=cold_water,
+                hot_water=hot_water,
+                gas=gas
+            )
+
+        except Exception as e:
+            logger.error(f"Ошибка при получении показаний для {email}: {e}")
+
+            # Возвращаем страницу с ошибкой
+            return await qa.render_template("error_readings.html")
