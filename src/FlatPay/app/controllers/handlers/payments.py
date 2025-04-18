@@ -30,7 +30,7 @@ async def apply_user_payment() -> str:
 
     if request.method == "GET":
         # Возвращаем страницу с формой для оплаты задолженности
-        return await qa.render_template("update_debt.html")
+        return await qa.render_template("apply_payment.html")
 
     elif request.method == "POST":
         form_data: dict = await request.form  # Получаем данные из формы
@@ -40,7 +40,7 @@ async def apply_user_payment() -> str:
             # Применяем платёж и обновляем данные пользователя в БД
             await apply_payment(connection, email, new_payment)
             # Если оплата успешна, возвращаем страницу с подтверждением
-            return await qa.render_template("successful_update_debt.html", email=email)
+            return await qa.render_template("successful_apply_payment.html", email=email)
 
         except ValueError:
             # В случае ошибки при попытке оплаты, возвращаем страницу с ошибкой

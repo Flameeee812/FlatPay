@@ -97,7 +97,7 @@ async def get_readings_info() -> str:
             # Отправляем страницу с показаниями
             return await qa.render_template(
                 "user_readings.html",
-                passport=email,
+                email=email,
                 electricity=electricity,
                 cold_water=cold_water,
                 hot_water=hot_water,
