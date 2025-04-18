@@ -76,9 +76,3 @@ pip-wheel-metadata/
 *.mypy_cache
 *.dmypy.json
 dmypy.json
-
-
-# ================================
-# docs
-# ================================
-/docs/
