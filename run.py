@@ -5,7 +5,7 @@ import uvicorn
 
 from FlatPay.core import setup_app
 from FlatPay.core import SettingsManager, Config, setup_logger
-from FlatPay.tasks.scheduler import run_scheduler, end_scheduler
+from FlatPay.tasks import run_scheduler, end_scheduler
 
 
 async def main(app_config: Config):
